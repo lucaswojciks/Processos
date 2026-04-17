@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import psycopg2
-from tqdm import tqdm
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as OpenpyxlImage
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
@@ -9,7 +8,7 @@ from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.styles import Alignment, Border, Side
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils.units import pixels_to_EMU
-
+from tqdm import tqdm
 
 DB_NAME = "p14526"
 TRECHO = "Acesso Aeroporto - Acesso Tapera - Acesso SC-401"
@@ -25,7 +24,7 @@ IMAGE_COLUMN = "Q"
 LARGURA_COLUNA_IMAGEM = 18
 ALTURA_LINHA_IMAGEM = 80  # points
 IMG_MAX_W = 110  # px
-IMG_MAX_H = 72   # px
+IMG_MAX_H = 72  # px
 
 # Aproximações usadas para centralizar a imagem na célula
 CELL_WIDTH_PX = 126
@@ -204,10 +203,10 @@ def main() -> None:
 
     print("3/4 Preenchendo planilha...")
     with tqdm(
-        total=total_rows,
-        desc="Gerando planilha",
-        unit="linha",
-        ncols=100
+            total=total_rows,
+            desc="Gerando planilha",
+            unit="linha",
+            ncols=100
     ) as pbar:
         for vertical_row in vertical_rows:
             cod = str(vertical_row[9])
