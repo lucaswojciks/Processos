@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import psycopg2
+from tqdm import tqdm
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as OpenpyxlImage
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
@@ -185,45 +186,54 @@ def preencher_linha(ws, excel_row: int, row_data: tuple) -> str:
 
 
 def main() -> None:
+    print("1/4 Conectando ao banco e buscando dados...")
     with psycopg2.connect(**DB_PARAMS) as conn:
         with conn.cursor() as cursor:
             cursor.execute(QUERY)
             vertical_rows = cursor.fetchall()
 
     total_rows = len(vertical_rows)
+    print(f"   {total_rows} registros encontrados.")
 
+    print("2/4 Carregando modelo Excel...")
     wb = load_workbook(EXCEL_MODEL_PATH)
     ws = wb.active
 
     border = configurar_planilha(ws)
     excel_row = 8
 
-    for indice, vertical_row in enumerate(vertical_rows, start=1):
-        cod = str(vertical_row[9])
-        id_serial = vertical_row[1]
+    print("3/4 Preenchendo planilha...")
+    with tqdm(
+        total=total_rows,
+        desc="Gerando planilha",
+        unit="linha",
+        ncols=100
+    ) as pbar:
+        for vertical_row in vertical_rows:
+            cod = str(vertical_row[9])
 
-        print(f"Processando {indice}/{total_rows} - ID_SERIAL: {id_serial}")
+            ws.row_dimensions[excel_row].height = ALTURA_LINHA_IMAGEM
 
-        ws.row_dimensions[excel_row].height = ALTURA_LINHA_IMAGEM
+            preencher_linha(ws, excel_row, vertical_row)
+            aplicar_estilo_linha(ws, excel_row, border)
 
-        preencher_linha(ws, excel_row, vertical_row)
-        aplicar_estilo_linha(ws, excel_row, border)
+            image_path = IMAGES_PATH / f"{cod}.png"
+            if image_path.exists():
+                try:
+                    inserir_imagem(
+                        ws=ws,
+                        caminho_imagem=image_path,
+                        celula=f"Q{excel_row}",
+                        max_w=IMG_MAX_W,
+                        max_h=IMG_MAX_H,
+                    )
+                except Exception as exc:
+                    tqdm.write(f"Erro ao inserir imagem {image_path.name}: {exc}")
 
-        image_path = IMAGES_PATH / f"{cod}.png"
-        if image_path.exists():
-            try:
-                inserir_imagem(
-                    ws=ws,
-                    caminho_imagem=image_path,
-                    celula=f"Q{excel_row}",
-                    max_w=IMG_MAX_W,
-                    max_h=IMG_MAX_H,
-                )
-            except Exception as exc:
-                print(f"Erro ao inserir imagem {image_path}: {exc}")
+            excel_row += 1
+            pbar.update(1)
 
-        excel_row += 1
-
+    print("4/4 Salvando arquivo...")
     OUTPUT_EXCEL.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUTPUT_EXCEL)
 
