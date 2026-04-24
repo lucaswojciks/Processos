@@ -15,6 +15,8 @@ trecho = "Acesso Aeroporto - Acesso Tapera - Acesso SC-401"
 pasta_projeto = "145.26 SINASC SIE Litoral"
 revisao = "REV00"
 
+str_where = "WHERE TRECHO_PROJETO IN('Acesso Aeroporto', 'Acesso Tapera', ' Acesso SC-401');"
+
 db_params = {
     "dbname": "p14526",
     "user": "postgres",
@@ -136,7 +138,7 @@ query = f"""
         cod_imagem,
         id
     FROM {view_name}
-    WHERE TRECHO_PROJETO IN ('Acesso Aeroporto', 'Acesso Tapera' ,' Acesso SC-401')
+    {str_where}
 """
 
 
