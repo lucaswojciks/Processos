@@ -21,8 +21,8 @@ BASE_PROJETO = Path(rf"S:\Projetos\{PASTA_PROJETO}")
 IMAGES_PATH = Path(rf"\\192.168.1.50\Projetos\Projeview\{DB_NAME}")
 ICONS_PATH = Path(r"\\192.168.1.50\Projetos\Projeview\_sistema\object_data\placa\icons")
 EXCEL_MODEL_PATH = BASE_PROJETO / "05 GIS" / "04 SCRIPTS" / "03_PLANILHAS" / "MODELOS" / "Cadastro Sinalizacao Vertical.xlsx"
-OUTPUT_EXCEL = Path(__file__).resolve().parents[2] / "output" / f"{TRECHO}_cadastro_vertical.xlsx"
-VERTICAL_PATH = Path(__file__).resolve().parents[2] / "output" / "VERTICAL"
+OUTPUT_EXCEL = Path(__file__).resolve().parents[1] / "output" / f"{TRECHO}_cadastro_vertical.xlsx"
+VERTICAL_PATH = Path(__file__).resolve().parents[1] / "output" / "VERTICAL"
 
 IMAGE_ITEM_COLUMN = "L"
 IMAGE_ICON_COLUMN = "M"
@@ -107,12 +107,12 @@ def aplicar_estilo_linha(ws, excel_row: int, border: Border) -> None:
         cell.border = border
 
 
-def obter_nome_imagem(imagem: dict | None, situacao: str) -> str | None:
-    """Retorna o nome da imagem correspondente à situação."""
+def obter_nome_imagem(imagem: dict | None) -> str | None:
+    """Retorna o primeiro nome de imagem disponível no dicionário."""
     if not imagem or not isinstance(imagem, dict):
         return None
 
-    return imagem.get(situacao)
+    return next(iter(imagem.values()), None)
 
 
 def inserir_imagem_objeto(ws, column: str, caminho_imagem: Path, excel_row: int) -> None:
@@ -284,7 +284,7 @@ def main() -> None:
                 pbar.update(1)
                 continue
 
-            imagem_name = obter_nome_imagem(imagem, situacao)
+            imagem_name = obter_nome_imagem(imagem)
             if imagem_name is None:
                 pbar.update(1)
                 continue
@@ -304,21 +304,21 @@ def main() -> None:
             else:
                 tqdm.write(f"Imagem não encontrada: {image_path.name}")
 
-            icon_path = ICONS_PATH / f"{cod}.png"
-            if icon_path.exists():
-                try:
-                    inserir_icone(
-                        ws=ws,
-                        column=IMAGE_ICON_COLUMN,
-                        caminho_imagem=icon_path,
-                        excel_row=excel_row,
-                        max_w=ICON_MAX_W,
-                        max_h=ICON_MAX_H,
-                    )
-                except Exception as exc:
-                    tqdm.write(f"Erro ao adicionar ícone {icon_path.name}: {exc}")
-            else:
-                tqdm.write(f"Ícone não encontrado: {icon_path.name}")
+            # icon_path = ICONS_PATH / f"{cod}.png"
+            # if icon_path.exists():
+            #     try:
+            #         inserir_icone(
+            #             ws=ws,
+            #             column=IMAGE_ICON_COLUMN,
+            #             caminho_imagem=icon_path,
+            #             excel_row=excel_row,
+            #             max_w=ICON_MAX_W,
+            #             max_h=ICON_MAX_H,
+            #         )
+            #     except Exception as exc:
+            #         tqdm.write(f"Erro ao adicionar ícone {icon_path.name}: {exc}")
+            # else:
+            #     tqdm.write(f"Ícone não encontrado: {icon_path.name}")
 
             excel_row += 1
             pbar.update(1)

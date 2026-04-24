@@ -18,7 +18,7 @@ REVISAO = "REV00"
 BASE_PROJETO = Path(rf"S:\Projetos\{PASTA_PROJETO}")
 EXCEL_MODEL_PATH = BASE_PROJETO / "05 GIS" / "04 SCRIPTS" / "03_PLANILHAS" / "MODELOS" / "Projeto Sinalizacao Vertical e Aerea.xlsx"
 IMAGES_PATH = BASE_PROJETO / "05 GIS" / "14 PLACAS" / TRECHO / "PNG"
-OUTPUT_EXCEL = Path(__file__).resolve().parents[2] / "output" / f"{TRECHO}_projeto_vertical.xlsx"
+OUTPUT_EXCEL = Path(__file__).resolve().parents[1] / "output" / f"{TRECHO}_projeto_vertical.xlsx"
 
 IMAGE_COLUMN = "Q"
 LARGURA_COLUNA_IMAGEM = 18
